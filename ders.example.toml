@@ -1,0 +1,34 @@
+# Ders programi (ornek). Kendi programinla ders.toml olarak kaydet.
+# gun: pzt sal car per cum cmt paz
+
+[donem]
+baslangic = 2026-09-21
+bitis = 2027-01-08
+tatil = []                     # ders olmayan gunler (vize haftasi vb.), ornek: [2026-11-16]
+
+[[ders]]
+kod = "BIL301"
+ad = "İşletim Sistemleri"
+gun = "sal"
+baslangic = "09:30"
+bitis = "12:15"
+yer = "Derslik 101"
+hoca = "Dr. Ad Soyad"
+
+[[ders]]
+kod = "BIL311"
+ad = "Makine Öğrenmesi"
+gun = "car"
+baslangic = "13:30"
+bitis = "16:15"
+yer = "Amfi 2"
+hoca = "Dr. Ad Soyad"
+
+# Sinav ve odevler buraya (ya da 22:30 mesajina cevap yazarak eklenecek):
+# [[sinav]]
+# ad = "Makine Öğrenmesi vize"
+# tarih = 2026-11-20T09:30
+#
+# [[odev]]
+# ad = "Proje teslimi"
+# son = 2026-12-01

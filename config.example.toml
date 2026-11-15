@@ -1,0 +1,77 @@
+# Otomasyon ayarlari (ornek). config.toml olarak kopyala ve kendine gore doldur.
+# Sir/anahtar YOK; onlar .env dosyasinda (bkz. .env.example, otomasyon.secrets).
+
+[gece]
+saat = "00:30"            # hafta ici (Paz-Per geceleri) baslangic
+saat_hafta_sonu = "01:00" # Cuma ve Cumartesi geceleri
+son_deneme = "03:00"      # bundan sonra kapatmaya calisma
+bosta_dakika = 15         # kullanici bu kadar dakikadir bostaysa kapat
+uyari_saniye = 300        # kapanmadan once iptal edilebilir uyari
+
+[yedek]
+# Google Drive masaustu uygulamasinin klasoru. rclone yerel kopyalar, yuklemeyi Drive uygulamasi yapar.
+hedef = "G:\\My Drive\\Backup\\current"
+eski = "G:\\My Drive\\Backup\\old"     # degisen/silinen dosyalar buraya, tarihli
+eski_gun = 90
+ikinci_kopya = "gdrive2:Backup/current" # Pazar; gdrive2 rclone'da tanimli degilse atlanir
+# ad = Drive'daki klasor adi, yol = yerel kaynak (yoksa atlanir)
+kaynak = [
+  { ad = "Projects",  yol = 'D:\Projects' },
+  { ad = "Documents", yol = '~\Documents' },
+  { ad = "Desktop",   yol = '~\Desktop' },
+  { ad = "claude",    yol = '~\.claude' },
+  { ad = "vscode",    yol = '~\AppData\Roaming\Code\User' },
+]
+dosya = [ '~\.gitconfig' ]   # tek dosyalar -> hedef/dosyalar/
+haric = [
+  "node_modules/**", ".venv/**", ".venvs/**", ".venv-*/**", "venv/**", "__pycache__/**", ".dart_tool/**", ".gradle/**",
+  "build/**", ".pytest_cache/**", ".mypy_cache/**", ".credentials.json", "workspaceStorage/**", "History/**",
+]
+
+[git]
+kok = 'D:\Projects'
+derinlik = 3
+branch = "wip/auto"
+atla = ['build\web']                  # bu yolu iceren repolar atlanir
+
+[guncelle]
+# winget'te sabitlenecekler (kullanici elle gunceller).
+pin = ["OpenJS.NodeJS", "Python.Python.3.12"]
+
+[saglik]
+disk_esik = 80
+
+[bot]
+sesli_limit = 3           # gunde en fazla sesli bildirim
+yarin_saat = "22:30"
+vitamin_durt = "23:30"    # vitamin isaretlenmediyse bir kez, sessiz
+hatirlatma_dk = 15
+takvim_hesap = "you@gmail.com"   # "Takvime ekle" linki bu hesapta acilir
+gunluk = '~\Obsidian\Vault\Daily'
+gunluk_sablon = '~\Obsidian\Vault\Templates\Daily.md'
+
+[haber]
+kaynak = [
+  { ad = "BBC Türkçe",  url = "https://feeds.bbci.co.uk/turkce/rss.xml" },
+  { ad = "Webrazzi",    url = "https://webrazzi.com/feed/" },
+  { ad = "Hacker News", url = "https://hnrss.org/best" },
+]
+
+[sabah]
+en_erken = "06:00"        # ilk oturum acilisi bu saatten sonraysa ozet gonder
+saat = "07:30"            # bilgisayar zaten aciksa bu saatte gonder
+claude_model = "sonnet"
+# Claude cevap vermezse SADECE haber/radar icin sirayla denenir (mail icerigi ucretsiz modellere gitmez)
+yedek_modeller = [
+  "gemini:gemini-3-flash-preview",
+  "openrouter:auto-free",
+]
+
+# Her Gmail hesabi icin bir blok. Uygulama sifresi .env'de GMAIL_<etiket> olarak durur.
+[[mail]]
+adres = "you@gmail.com"
+etiket = "MAIN"
+
+[[mail]]
+adres = "second@gmail.com"
+etiket = "SECOND"
