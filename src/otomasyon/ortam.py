@@ -12,6 +12,8 @@ CONFIG = tomllib.loads((KOK / "config.toml").read_text(encoding="utf-8"))
 WINDOWS = sys.platform == "win32"
 STATE = Path(os.environ.get("OTOMASYON_STATE") or (r"D:\Dev\otomasyon\state" if WINDOWS else "~/.local/state/otomasyon")).expanduser()
 STATE.mkdir(parents=True, exist_ok=True)
+ORTAK = STATE / "ortak"  # shared PC <-> UNO Q via Syncthing; PC writes gece-son.json here, the bot reads it
+ORTAK.mkdir(exist_ok=True)
 
 
 def _env() -> dict[str, str]:
@@ -38,9 +40,9 @@ def log(adim: str, mesaj: str) -> None:
         f.write(satir + "\n")
 
 
-def kaydet(ad: str, veri: dict) -> None:
+def kaydet(ad: str, veri: dict, klasor: Path = STATE) -> None:
     veri = {"zaman": datetime.now().isoformat(timespec="seconds"), **veri}
-    (STATE / f"{ad}.json").write_text(json.dumps(veri, ensure_ascii=False, indent=2), encoding="utf-8")
+    (klasor / f"{ad}.json").write_text(json.dumps(veri, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 def calistir(cmd: list[str], **kw) -> subprocess.CompletedProcess:

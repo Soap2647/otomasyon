@@ -14,7 +14,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.constants import ChatAction, ParseMode
 from telegram.ext import Application, CallbackQueryHandler, CommandHandler, ContextTypes, MessageHandler, filters
 
-from . import asistan, durum, mesaj, obsidian, plan, takvim
+from . import asistan, durum, matris, mesaj, obsidian, plan, takvim
 from .ortam import CONFIG, log, sir
 
 C = CONFIG["bot"]
@@ -187,6 +187,8 @@ async def buton(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
         g = durum.gun(d)
         g["vitamin"] = not g["vitamin"]
         durum.yaz(d)
+        if g["vitamin"]:
+            matris.mutlu()
         await q.answer("Vitamin ✅" if g["vitamin"] else "Geri alındı")
         await q.edit_message_reply_markup(_klavye([[{"text": "✅ Vitamin alındı" if g["vitamin"] else "☐ Vitamin", "callback_data": "vitamin"}]]))
         return
@@ -256,6 +258,7 @@ async def _baslangic(app: Application) -> None:
     simdi = datetime.now(TZ)
     if _saat(CONFIG["sabah"]["en_erken"]).replace(tzinfo=None) <= simdi.time() < time(18, 0):
         jq.run_once(_job_sabah, 30, name="sabah-acilis")  # first logon of the day (skipped if already sent)
+    matris.baslat()
     log("bot", "bot basladi")
 
 

@@ -1,11 +1,11 @@
 """Builds the morning briefing and the 22:30 'tomorrow' message (HTML text + button rows)."""
 import json
-import subprocess
+import re
 from datetime import date, datetime, timedelta
 from html import escape as e
 
 from . import durum, haber, hava, llm, mail, plan
-from .ortam import CONFIG, STATE
+from .ortam import CONFIG, ORTAK
 
 AYLAR = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"]
 GUNLER = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"]
@@ -59,7 +59,7 @@ HABER ADAYLARI:
 
 def _gece_satiri() -> str:
     try:
-        g = json.loads((STATE / "gece-son.json").read_text(encoding="utf-8"))
+        g = json.loads((ORTAK / "gece-son.json").read_text(encoding="utf-8"))
     except FileNotFoundError:
         return "💻 gece işleri henüz hiç çalışmadı"
     if g.get("deneme") or datetime.now() - datetime.fromisoformat(g["zaman"]) > timedelta(hours=20):
@@ -114,7 +114,9 @@ def sabah() -> tuple[str, list[list[dict]]]:
         diger = m["bulten"] + len(m["mailler"]) - len(secili)
         s.append(f"📰 Diğer: {diger} bülten/bildirim" + ("" if secili else " · önemli mail yok"))
         gundem = sonuc["gundem"]
+        onemli_var = bool(secili)
     else:  # modelless: subjects only (mail content never goes to free models)
+        onemli_var = False
         insan = [x for x in m["mailler"] if not x["otomatik"]]
         s.append(f"✉️ <b>Mail</b> (özetsiz, Claude yok){hata}")
         s += [f"• ({x['hesap']}) {e(x['kimden'][:25])}: {e(x['konu'][:70])}" for x in insan[:8]]
@@ -139,6 +141,10 @@ def sabah() -> tuple[str, list[list[dict]]]:
             butonlar.append([{"text": f"✅ {x['metin'][:30]}", "callback_data": f"bitti:{x['id']}"}])
     s.append("")
     s.append(_gece_satiri())
+    yagis = re.search(r"yağış %(\d+)", hava_)
+    d = durum.oku()  # flags for the LED matrix face (matris.py)
+    durum.gun(d).update(matris_mail=onemli_var, matris_yagmur=bool(yagis and int(yagis[1]) >= 60))
+    durum.yaz(d)
     return "\n".join(s), butonlar
 
 
@@ -152,18 +158,13 @@ def _kaynak_basina_ilk(h: list[dict]) -> list[dict]:
 
 
 def _haftalik() -> list[str]:
-    """Sunday add-on: commits in the last 7 days per repo (all branches, by the user's git email)."""
-    from .gitwip import repolar
-    eposta = subprocess.run(["git", "config", "--global", "user.email"], capture_output=True, text=True).stdout.strip()
-    sayilar = []
-    for r in repolar():
-        out = subprocess.run(["git", "-C", str(r), "log", "--all", "--since=7.days", f"--author={eposta}", "--oneline"],
-                             capture_output=True, text=True, encoding="utf-8", errors="replace").stdout
-        if n := len(out.splitlines()):
-            sayilar.append((n, r.name))
+    """Sunday add-on: per-repo commit counts, computed by the PC's nightly run (gece-son.json)."""
     s = ["", "📊 <b>Haftalık özet</b>"]
-    s += [f"• {e(ad)}: {n} commit" for n, ad in sorted(sayilar, reverse=True)] or ["• bu hafta commit yok"]
-    return s
+    try:
+        sayilar = json.loads((ORTAK / "gece-son.json").read_text(encoding="utf-8"))["haftalik"]
+    except (FileNotFoundError, KeyError, json.JSONDecodeError):
+        return s + ["• commit sayısı yok (bilgisayarın gece işi henüz yazmadı)"]
+    return s + ([f"• {e(ad)}: {n} commit" for ad, n in sayilar] or ["• bu hafta commit yok"])
 
 
 def yarin(vitamin: bool = False) -> tuple[str, list[list[dict]]]:

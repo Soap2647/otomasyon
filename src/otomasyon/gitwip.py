@@ -32,6 +32,16 @@ def repolar() -> list[Path]:
     return sorted(out)
 
 
+def haftalik_commit() -> list[list]:
+    """[[repo, n], ...]: commits in the last 7 days per repo (all branches, by the user's git email), most first."""
+    eposta = calistir(["git", "config", "--global", "user.email"]).stdout.strip()
+    sayilar = []
+    for r in repolar():
+        if n := len(_git(r, "log", "--all", "--since=7.days", f"--author={eposta}", "--oneline").stdout.splitlines()):
+            sayilar.append([r.name, n])
+    return sorted(sayilar, key=lambda x: -x[1])
+
+
 def _slug(s: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")
 

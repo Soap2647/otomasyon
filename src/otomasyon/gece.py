@@ -9,7 +9,7 @@ import json
 from datetime import date
 
 from . import bakim, gitwip, kapanis, yedek
-from .ortam import STATE, kaydet, log
+from .ortam import ORTAK, kaydet, log
 
 ADIMLAR = ["yedek", "ikinci", "git", "guncelle", "saglik", "kapanis"]
 
@@ -29,11 +29,12 @@ def main() -> None:
         s["ikinci_kopya"] = yedek.ikinci_kopya(deneme)
     if "git" in secili:
         s["git"] = gitwip.calistir_hepsi(deneme)
+        s["haftalik"] = gitwip.haftalik_commit()  # Sunday summary on the bot side reads this
     if "guncelle" in secili:
         s["guncelle"] = bakim.guncelle(deneme)
     if "saglik" in secili:
         s["saglik"] = bakim.saglik()
-    kaydet("gece-son", s)  # morning briefing reads this
+    kaydet("gece-son", s, ORTAK)  # morning briefing reads this
 
     if "kapanis" in secili:
         if s.get("yedek", {}).get("ok") is False:
@@ -41,10 +42,10 @@ def main() -> None:
             log("kapanis", "yedek hatali -> kapanmiyor")
         else:
             s["kapanis"] = kapanis.kapat(deneme)
-        kaydet("gece-son", s)
+        kaydet("gece-son", s, ORTAK)
     log("gece", "===== bitti")
     print(json.dumps(s, ensure_ascii=False, indent=2))
-    print(f"\nSonuc dosyasi: {STATE / 'gece-son.json'}")
+    print(f"\nSonuc dosyasi: {ORTAK / 'gece-son.json'}")
 
 
 if __name__ == "__main__":

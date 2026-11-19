@@ -25,8 +25,9 @@ def _yol(p: str) -> Path:
 
 
 def _ortak(deneme: bool) -> list[str]:
-    # Drive desktop mount: preallocation makes it report wrong sizes, and it keeps mtimes only to the millisecond
-    a = ["--fast-list", "--transfers", "4", "--checkers", "16", "--retries", "5", "--low-level-retries", "20",
+    # Drive desktop mount: preallocation makes it report wrong sizes, and it keeps mtimes only to the millisecond.
+    # Parallel transfers race on mkdir ("already exists") and .partial renames fail there, so: 1 transfer, --inplace.
+    a = ["--fast-list", "--transfers", "1", "--checkers", "16", "--inplace", "--retries", "5", "--low-level-retries", "20",
          "--local-no-preallocate", "--modify-window", "1s", "--log-level", "NOTICE" if deneme else "ERROR"]
     for h in C["haric"]:
         a += ["--exclude", h]

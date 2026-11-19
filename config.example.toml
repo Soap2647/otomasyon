@@ -25,7 +25,7 @@ kaynak = [
 dosya = [ '~\.gitconfig' ]   # tek dosyalar -> hedef/dosyalar/
 haric = [
   "node_modules/**", ".venv/**", ".venvs/**", ".venv-*/**", "venv/**", "__pycache__/**", ".dart_tool/**", ".gradle/**",
-  "build/**", ".pytest_cache/**", ".mypy_cache/**", ".credentials.json", "workspaceStorage/**", "History/**",
+  "build/**", ".pytest_cache/**", ".mypy_cache/**", ".credentials.json", "workspaceStorage/**", "History/**", "desktop.ini",
 ]
 
 [git]
